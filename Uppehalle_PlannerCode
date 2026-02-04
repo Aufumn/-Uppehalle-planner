@@ -23,7 +23,7 @@ for allergy, answer in allergies.items():
 
 # Check if any recipes are left
 if safe_recipes.empty:
-    print("\nNo safe recipes found 😢")
+    print("\nNo safe recipes found")
 else:
     print("\nHere are 3 recipes that are safe for you:\n")
 
