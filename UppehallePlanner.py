@@ -8,7 +8,7 @@ print("Answer y or n for each allergy:\n")
 
 allergies = {
     "Gluten": input("Are you allergic to gluten? (y/n): ").lower(),
-    "Diary": input("Are you allergic to dairy? (y/n): ").lower(),
+    "Dairy": input("Are you allergic to dairy? (y/n): ").lower(),
     "Eggs": input("Are you allergic to eggs? (y/n): ").lower(),
     "Nuts": input("Are you allergic to nuts? (y/n): ").lower(),
 }
