@@ -1,37 +1,44 @@
+console.log("JS file is connected");
+
 let recipes = [];
 
+// Load CSV after page loads
 document.addEventListener("DOMContentLoaded", () => {
   loadCSV();
+
+  // Attach button listener
+  document.getElementById("findBtn").addEventListener("click", findRecipes);
 });
 
+// Function to load CSV
 async function loadCSV() {
   try {
     const response = await fetch("./Uppehalle_CSV.csv");
-    const text = await response.text();
+    if (!response.ok) throw new Error("CSV file not found");
 
+    const text = await response.text();
     const rows = text.trim().split("\n");
 
-    // Proper CSV split that respects quotes
+    // Parse header
     const headers = parseCSVRow(rows[0]);
 
+    // Parse all recipes
     for (let i = 1; i < rows.length; i++) {
       const values = parseCSVRow(rows[i]);
       let recipe = {};
-
       headers.forEach((header, index) => {
         recipe[header.trim()] = values[index]?.trim();
       });
-
       recipes.push(recipe);
     }
 
-    console.log("CSV Loaded:", recipes);
+    console.log("CSV Loaded Successfully:", recipes);
   } catch (error) {
     console.error("Error loading CSV:", error);
   }
 }
 
-// Handles quoted CSV properly
+// Function to parse a single CSV row (handles quoted commas)
 function parseCSVRow(row) {
   const result = [];
   let current = "";
@@ -47,16 +54,14 @@ function parseCSVRow(row) {
       current += char;
     }
   }
-
   result.push(current);
   return result;
 }
 
+// Function to find and display safe recipes
 function findRecipes() {
-  console.log("Button clicked");
-
   if (recipes.length === 0) {
-    alert("Recipes are still loading.");
+    alert("Recipes are still loading. Please wait.");
     return;
   }
 
@@ -87,6 +92,8 @@ function findRecipes() {
     return;
   }
 
+  // Show up to 3 recipes (randomized)
+  safeRecipes.sort(() => 0.5 - Math.random());
   safeRecipes.slice(0, 3).forEach(recipe => {
     resultsDiv.innerHTML += `
       <h3>${recipe.Recipe}</h3>
