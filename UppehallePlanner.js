@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("findBtn").addEventListener("click", findRecipes);
 });
 
-// Function to load CSV
+//Load CSV
 async function loadCSV() {
   try {
     const response = await fetch("./Uppehalle_CSV.csv");
@@ -19,16 +19,21 @@ async function loadCSV() {
     const text = await response.text();
     const rows = text.trim().split("\n");
 
-    // Parse header
+    // Parse header row
     const headers = parseCSVRow(rows[0]);
 
-    // Parse all recipes
+    // Clear recipes array in case of reload
+    recipes = [];
+
+    // Parse each recipe row
     for (let i = 1; i < rows.length; i++) {
       const values = parseCSVRow(rows[i]);
       let recipe = {};
+
       headers.forEach((header, index) => {
         recipe[header.trim()] = values[index]?.trim();
       });
+
       recipes.push(recipe);
     }
 
@@ -38,7 +43,7 @@ async function loadCSV() {
   }
 }
 
-// Function to parse a single CSV row (handles quoted commas)
+//Handle quotes in CSV
 function parseCSVRow(row) {
   const result = [];
   let current = "";
@@ -54,11 +59,12 @@ function parseCSVRow(row) {
       current += char;
     }
   }
+
   result.push(current);
   return result;
 }
 
-// Function to find and display safe recipes
+//Find safe recipes
 function findRecipes() {
   if (recipes.length === 0) {
     alert("Recipes are still loading. Please wait.");
@@ -72,6 +78,7 @@ function findRecipes() {
     Nuts: document.getElementById("Nuts").checked
   };
 
+  // Filter recipes
   let safeRecipes = recipes.filter(recipe => {
     for (let allergy in allergies) {
       if (
@@ -92,14 +99,51 @@ function findRecipes() {
     return;
   }
 
-  // Show up to 3 recipes (randomized)
+  // Shuffle recipes
   safeRecipes.sort(() => 0.5 - Math.random());
+
+  // Show up to 3
   safeRecipes.slice(0, 3).forEach(recipe => {
-    resultsDiv.innerHTML += `
-      <h3>${recipe.Recipe}</h3>
-      <p><strong>Ingredients:</strong> ${recipe.Ingredients}</p>
-      <p><strong>Instructions:</strong> ${recipe.Instructions}</p>
-      <hr>
-    `;
+    const card = document.createElement("div");
+    card.classList.add("recipe-card");
+
+    const title = document.createElement("h3");
+    title.textContent = recipe.Recipe;
+
+    const tagContainer = document.createElement("div");
+    tagContainer.classList.add("recipe-tags");
+
+    const allergenList = ["Gluten", "Dairy", "Eggs", "Nuts"];
+    let hasAllergens = false;
+
+    allergenList.forEach(allergen => {
+      if (recipe[allergen]?.trim().toUpperCase() === "Y") {
+        hasAllergens = true;
+        const tag = document.createElement("span");
+        tag.classList.add("tag");
+        tag.textContent = allergen;
+        tagContainer.appendChild(tag);
+      }
+    });
+
+    if (!hasAllergens) {
+      const safeTag = document.createElement("span");
+      safeTag.classList.add("tag");
+      safeTag.textContent = "No Allergens";
+      tagContainer.appendChild(safeTag);
+    }
+
+    const ingredients = document.createElement("p");
+    ingredients.innerHTML = `<strong>Ingredients:</strong> ${recipe.Ingredients}`;
+
+    const instructions = document.createElement("p");
+    instructions.innerHTML = `<strong>Instructions:</strong> ${recipe.Instructions}`;
+
+    card.appendChild(title);
+    card.appendChild(tagContainer);
+    card.appendChild(ingredients);
+    card.appendChild(instructions);
+
+    resultsDiv.appendChild(card);
   });
 }
